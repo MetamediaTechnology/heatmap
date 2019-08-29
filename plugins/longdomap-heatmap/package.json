@@ -1,0 +1,20 @@
+{
+    "name": "longdomap-heatmap",
+    "version": "0.0.1",
+    "description": "heatmap.js Longdo Maps Overlay",
+    "homepage": "",
+    "main": "longdomap-heatmap.js",
+    "dependencies": {
+      "heatmap.js": "*"
+    },
+    "keywords": [
+      "heatmap",
+      "heat",
+      "heat map",
+      "heatmaps",
+      "heat maps",
+      "map",
+      "maps"
+    ]
+  }
+  
