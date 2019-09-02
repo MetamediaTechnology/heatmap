@@ -19,44 +19,50 @@
     'use strict';
 
     var HeatmapOverlay = function(map, cfg){
-        this.initialize(map, cfg);
-        /*
-        this.url = function (projection, tile, zoom){
-            console.log(this._heatmap.getDataURL());
-            return this._heatmap.getDataURL();
-        };*/
+        this.initialize(map, cfg); 
+        longdo.Layer.call(this,'test',{
+            type: longdo.LayerType.Custom,
+            url: function(){return this.getURL();}});      
     };
     
-    HeatmapOverlay.prototype = new longdo.Layer('test', {
-        type: longdo.LayerType.Custom  ,
-        url: 'https://dummyimage.com/256x256/000/fff'
-    });
-
+    // HeatmapOverlay.prototype = new longdo.Layer('test', {
+    //     type: longdo.LayerType.Custom,
+    //     url: function(){}
+    // });
+    
     HeatmapOverlay.prototype.initialize = function(map, cfg){
         this.cfg = cfg;
         this._data = [];
         this._max = 1;
         this._min = 0;
+        this._map = map;
+        var width = map.placeholder().offsetWidth;
+        var height = map.placeholder().offsetHeight;
         this.cfg.container = document.createElement('div');
         this._el = this.cfg.container;
-        this._heatmap = h337.create(this.cfg);
-        this._map = map;
-        var width = map.placeholder().style.width;
-        var height = map.placeholder().style.height;
         this._el.style.cssText = 'width:' + width + 'px;height:'+height+'px;';
-    }
+        this._heatmap = h337.create(this.cfg);
+        
+        
+
+        var instance = this;
+        this._map.Event.bind('ready', function (){instance.ManualOnAdd();instance._draw();});
+    };
+    HeatmapOverlay.prototype.getURL = function (projection, tile, zoom){
+        return '';
+    };
 
 
     
 
     HeatmapOverlay.prototype.ManualOnAdd = function (){
-        this._width = map.placeholder().style.width;
-        this._height = map.placeholder().style.height;
-        this.cfg.container.style.width = map.placeholder().style.width + 'px';
-        this.cfg.container.style.height = map.placeholder().style.height + 'px';
-        this.cfg.container.stle.position = 'absolute';
-        map.Events.add('drop', this._reset);
-        map.Events.add('zoomRange', this._reset);
+        this._width = this._map.placeholder().offsetWidth;
+        this._height = this._map.placeholder().offsetHeight;
+        this._el.style.width = this._width + 'px';
+        this._el.style.height = this._height + 'px';
+        this._el.style.position = 'absolute';
+        // this._map.Event.bind('drop', this._reset);
+        // this._map.Event.bind('zoomRange', this._reset);
     };
     HeatmapOverlay.prototype._draw = function (){
         if(!this._map)return;
@@ -91,30 +97,32 @@
             var entry = this._data[len];
             var lat = entry.lat, lon = entry.lon, value = entry.value,radius;
             
-            //Inside check
-            if(!(lat <= bounds.maxlat && lat >= bounds.minlat 
-                && lon <= bounds.maxlon && lon >= bounds.minlon))continue;
-            
             localMax = Math.max(value, localMax);
             localMin = Math.min(value, localMin);
             //possibly cause problem
             //cal screen pos
-            var point = {y: Math.round(lat - bounds.minlat), x: Math.round(lon - bounds.minlon)};
-            radius = entry.radius ? entry.radius * radiusMultiplier : (this.cfg.radius || 2) * radiusMultiplier;
-            point.radius = radius;
-            points.push(point);
+            //TODO
+            var calp = this._ConvertLatLonToScreenPos({lat:lat,lon:lon});
+            var lenlen = calp.length;
+            while(lenlen--){
+                var point = {y: calp[lenlen].y, x: calp[lenlen].x, value: value};
+                radius = entry.radius ? entry.radius * radiusMultiplier : (this.cfg.radius || 2) * radiusMultiplier;
+                point.radius = radius;
+                points.push(point);
+            }
         }
         if(this.cfg.useLocalExtrema){
             generatedData.max = localMax;
             generatedData.min = localMin;
         }
         generatedData.data = points;
+        this._heatmap._renderer.setDimensions(this._width, this._height);
         this._heatmap.setData(generatedData);
     };
 
     HeatmapOverlay.prototype._reset = function (){
-        if(this._width !== map.placeholder().style.width || this._height !== map.placeholder().style.height)
-        this._width = map.placeholder().style.width;
+        if(this._width !== map.placeholder().style.offsetWidth || this._height !== map.placeholder().style.height)
+        this._width = map.placeholder().style.offsetWidth;
         this._height = map.placeholder().style.height;
         this._el.style.width = this._width+'px';
         this._el.style.height = this._height + 
@@ -131,11 +139,33 @@
         var PointsData = data.data, len = PointsData.length, d = [];
 
         while (len--){
-            var entry = data[len];
-            d.push({lat: entry['lat'], lon: entry['lon'], valie: entry['value']});
+            var entry = PointsData[len];
+            d.push({lat: entry.lat, lon: entry.lon, value: entry.value});
         }
         this._data = d;
         this._draw();
+    };
+    HeatmapOverlay.prototype._ConvertLatLonToScreenPos = function(latlon){
+        var bounds = this._map.bound();
+        var points = [];
+        if(!latlon)latlon = this._map.location();
+        var LT = [bounds.minLon, bounds.maxLat];
+        var RB = [bounds.maxLon, bounds.minLat];
+        var scalex = (RB[0] - LT[0]) / this._width;
+        var scaley = (RB[1] - LT[1]) / this._height;
+        while(latlon.lon+360 <= RB[0]){
+            latlon.lon+=360;
+        }
+        while(latlon.lon >= LT[0]){
+            points.push({x: Math.round((latlon.lon - LT[0]) / scalex)});
+            latlon.lon-=360;
+        }
+        //TODO: calculated y-pos is little incorrect
+        var len = points.length;
+        while(len--){
+            points[len].y = Math.round((latlon.lat - LT[1]) / scaley);
+        }
+        return points;
     };
 
     HeatmapOverlay.CSS_TRANSFORM = (function() {
