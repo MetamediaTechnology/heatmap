@@ -1,6 +1,3 @@
-//
-//
-//
 ;(function (name, context, factory){
     if (typeof module !== 'undefined' && module.exports){
         module.exports = factory(require('heatmap.js'));
@@ -19,10 +16,17 @@
     'use strict';
 
     var HeatmapOverlay = function(map, cfg){
-        this.initialize(map, cfg); 
-        longdo.Layer.call(this,'test',{
+        this.initialize(map, cfg);
+        var instance = this;
+        map.Layers.add(new longdo.Layer('test',{
             type: longdo.LayerType.Custom,
-            url: function(){return this.getURL();}});      
+            url: function(projection,map,zoom){
+                return instance.getURL(projection, map, zoom);
+            }
+        }));
+        // longdo.Layer.call(this,'test',{
+        //     type: longdo.LayerType.Custom,
+        //     url: function(){return this.getURL();}});      
     };
     
     // HeatmapOverlay.prototype = new longdo.Layer('test', {
@@ -36,46 +40,33 @@
         this._max = 1;
         this._min = 0;
         this._map = map;
-        var width = map.placeholder().offsetWidth;
-        var height = map.placeholder().offsetHeight;
         this.cfg.container = document.createElement('div');
-        this._el = this.cfg.container;
-        this._el.style.cssText = 'width:' + width + 'px;height:'+height+'px;';
         this._heatmap = h337.create(this.cfg);
         
-        
+        this.canvas = document.createElement('canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.tileNumSqrt = 2 << map.zoom();
+        this.tileResSqrt = 32;
+        this.tiles = new Array(this.tileNumSqrt).fill([]).map(() => new Array(this.tileNumSqrt).fill(''));
 
         var instance = this;
         this._map.Event.bind('ready', function (){instance.ManualOnAdd();instance._draw();});
     };
     HeatmapOverlay.prototype.getURL = function (projection, tile, zoom){
-        return '';
+        //TODO
+        
+        return this.tiles[tile.u][tile.v];
     };
 
 
     
 
     HeatmapOverlay.prototype.ManualOnAdd = function (){
-        this._width = this._map.placeholder().offsetWidth;
-        this._height = this._map.placeholder().offsetHeight;
-        this._el.style.width = this._width + 'px';
-        this._el.style.height = this._height + 'px';
-        this._el.style.position = 'absolute';
         // this._map.Event.bind('drop', this._reset);
         // this._map.Event.bind('zoomRange', this._reset);
     };
     HeatmapOverlay.prototype._draw = function (){
         if(!this._map)return;
-        //reposition the layer
-        var rect = this._el.getBoundingClientRect();
-        this._el.style[HeatmapOverlay.CSS_TRANSFORM] = 'translate(' +
-        -Math.round(rect.left + window.scrollX) + 'px,' +
-        -Math.round(rect.top + window.scrollY) + 'px)';
-        /*
-        this.cfg.container.style[HeatmapOverlay.CSS_TRANSFORM] =  'translate(' +
-        -Math.round(point.x) + 'px,' +
-        -Math.round(point.y) + 'px)';
-        */
         this._update();
     };
     HeatmapOverlay.prototype._update = function (){
@@ -105,7 +96,9 @@
             var calp = this._ConvertLatLonToScreenPos({lat:lat,lon:lon});
             var lenlen = calp.length;
             while(lenlen--){
-                var point = {y: calp[lenlen].y, x: calp[lenlen].x, value: value};
+                // var point = {y: calp[lenlen].y, x: calp[lenlen].x, value: value};
+                var converted = this._ConvertLatLonToNormalizedPos(entry);
+                var point = {x: converted.x * this.tileResSqrt*this.tileNumSqrt, y: converted.y *  this.tileResSqrt*this.tileNumSqrt, value: value};
                 radius = entry.radius ? entry.radius * radiusMultiplier : (this.cfg.radius || 2) * radiusMultiplier;
                 point.radius = radius;
                 points.push(point);
@@ -116,18 +109,26 @@
             generatedData.min = localMin;
         }
         generatedData.data = points;
-        this._heatmap._renderer.setDimensions(this._width, this._height);
+        // this._heatmap._renderer.setDimensions(this._width, this._height);
+        var dimlen = this.tileResSqrt*this.tileNumSqrt;
+        this._heatmap._renderer.setDimensions(dimlen, dimlen);
         this._heatmap.setData(generatedData);
+        var img = new Image();
+        img.src = this._heatmap.getDataURL();
+        this.canvas.width = this.canvas.height = this.tileResSqrt;
+        var blankimg = document.createElement('canvas');
+        for(var i = 0; i < this.tileNumSqrt*this.tileNumSqrt; i++){
+            var x = i % this.tileNumSqrt, y = Math.floor(i / this.tileNumSqrt);
+            this.ctx.drawImage(img,x*this.tileResSqrt,y*this.tileResSqrt,this.tileResSqrt,this.tileResSqrt,0,0,this.tileResSqrt,this.tileResSqrt);
+            var durl = this.canvas.toDataURL();
+            this.tiles[x][y] = durl == blankimg.toDataURL() ? '' : durl;
+        }
+        
     };
 
     HeatmapOverlay.prototype._reset = function (){
-        if(this._width !== map.placeholder().style.offsetWidth || this._height !== map.placeholder().style.height)
-        this._width = map.placeholder().style.offsetWidth;
-        this._height = map.placeholder().style.height;
-        this._el.style.width = this._width+'px';
-        this._el.style.height = this._height + 
-        'px';
-        this._heatmap._renderer.setDimensions(this._width, this._height);
+        var dimlen = this.tileResSqrt*this.tileNumSqrt;
+        this._heatmap._renderer.setDimensions(dimlen,dimlen);
         this._draw();
     };
 
@@ -145,6 +146,13 @@
         this._data = d;
         this._draw();
     };
+
+    HeatmapOverlay.prototype._ConvertLatLonToNormalizedPos = function (latlon){
+        var nx = (latlon.lon+180)/360;
+        var ny = (-latlon.lat+90)/180;
+        return {x:nx, y:ny};
+    };
+
     HeatmapOverlay.prototype._ConvertLatLonToScreenPos = function(latlon){
         var bounds = this._map.bound();
         var points = [];
