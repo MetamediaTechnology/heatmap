@@ -126,7 +126,9 @@
         var data = data.data, len = data.length;
         while (len--){
             var entry = data[len];
-            this._data.push({lat: entry.lat, lon: entry.lon, value: entry.value});
+            var d = {lat: entry.lat, lon: entry.lon, value: entry.value};
+            if(entry.radius)d.radius = entry.radius;
+            this._data.push(d);
         }
     };
     HeatmapOverlay.prototype._getTileIncludeLatlon = function (latlon,projection){
