@@ -45,7 +45,7 @@
         this._data = [];
         this._max = 1;
         this._min = 0;
-        this.tileNumSqrt = 2 << 1;
+        this.tileNumSqrtX = this.tileNumSqrtY = 2 << 1;
         this.tileResSqrt = 64;
         this.cfg.container = document.createElement('div');
         this.cfg.container.style.cssText = 'width:' + this.tileResSqrt + 'px;height:' + this.tileResSqrt + 'px';
@@ -61,8 +61,8 @@
      * @returns {String} base64 encoded image scheme URL
      */
     HeatmapOverlay.prototype._getURL = function (projection, tile, zoom){
-        if(projection != longdo.Projections.EPSG3857)return '';
-        this.tileNumSqrt = 2 << (zoom-1);
+        this.tileNumSqrtX = 2 << (zoom-1);
+        this.tileNumSqrtY = projection == longdo.Projections.EPSG4326 ? this.tileNumSqrtX/2 : this.tileNumSqrtX;
         var len = this._data.length;
         var generatedData = {data:[],max:this._max,min:this._min};
         var Alloutside = false;
@@ -73,21 +73,21 @@
         var localMax = 0, localMin = 0;
         while(len--){
             var entry = this._data[len];
-            var inctile = this._getTileIncludeLatlon(entry);
+            var inctile = this._getTileIncludeLatlon(entry,projection);
             var scale = 2 << (zoom - 1);
             var radiusMultiplier = this.cfg.scaleRadius ? scale : 1;
             var radius = entry.radius ? entry.radius * radiusMultiplier : (this.cfg.radius || 2) * radiusMultiplier;
             var distance = radius / this.tileResSqrt;
             if(Math.abs(inctile.u - tile.u) <= Math.ceil(1+distance) && Math.abs(inctile.v - tile.v) <= Math.ceil(1+distance)){
-                var elon = 360 / this.tileNumSqrt;
+                var elon = 360 / this.tileNumSqrtX;
                 var offsetlon =  entry.lon +  180 - tile.u * elon;
                 
-                var elat = 180/(this.tileNumSqrt);
-                var offsetlat = 90 - this._lat2y(entry.lat)/2- elat*tile.v;
+                var elat = 180 / this.tileNumSqrtY;
+                var offsetlat = projection == longdo.Projections.EPSG4326 ? 90 - entry.lat - elat*tile.v : 90 - this._lat2y(entry.lat)/2- elat*tile.v;
 
                 var x = Math.round(offsetlon*(this.tileResSqrt/elon));
                 var y = Math.round(offsetlat*(this.tileResSqrt/elat));
-                Alloutside = x < 0 || x > this.tileResSqrt || y < 0 || y > this.tileResSqrt;
+                Alloutside = Alloutside || x < 0 || x > this.tileResSqrt || y < 0 || y > this.tileResSqrt;
 
                 generatedData.data.push({x: x, y: y, value: entry.value, radius: radius});
             }
@@ -123,11 +123,11 @@
             this._data.push({lat: entry.lat, lon: entry.lon, value: entry.value});
         }
     };
-    HeatmapOverlay.prototype._getTileIncludeLatlon = function (latlon){
+    HeatmapOverlay.prototype._getTileIncludeLatlon = function (latlon,projection){
         var tx = latlon.lon + 180;
-        var ex = 360 / this.tileNumSqrt;
-        var y = 180 - this._lat2y(latlon.lat);
-        var ey = 360 / this.tileNumSqrt;
+        var y = projection == longdo.Projections.EPSG4326 ? 90 - latlon.lat : 180 - this._lat2y(latlon.lat);
+        var ex = 360 / this.tileNumSqrtX;
+        var ey = projection == longdo.Projections.EPSG4326 ? 180 / this.tileNumSqrtY : 360 / this.tileNumSqrtY;
         return {u:Math.floor(tx/ex),v:Math.floor(y/ey)};
     };
 
@@ -136,6 +136,6 @@
     */
     HeatmapOverlay.prototype._y2lat = function (y) { return (Math.atan(Math.exp(y / (180 / Math.PI))) / (Math.PI / 4) - 1) * 90; };
     HeatmapOverlay.prototype._lat2y = function (lat) { return Math.log(Math.tan((lat / 90 + 1) * (Math.PI / 4) )) * (180 / Math.PI); };
- 
+
     return HeatmapOverlay;
 });
