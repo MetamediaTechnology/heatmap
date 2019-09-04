@@ -1,3 +1,10 @@
+/*
+* heatmap.js Google Maps Overlay
+*
+* Copyright (c) 2008-2016, Patrick Wied (https://www.patrick-wied.at)
+* Dual-licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
+* and the Beerware (http://en.wikipedia.org/wiki/Beerware) license.
+*/
 ;(function (name, context, factory){
     if (typeof module !== 'undefined' && module.exports){
         module.exports = factory(require('heatmap.js'));
