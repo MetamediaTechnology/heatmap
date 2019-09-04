@@ -22,20 +22,25 @@
 })("HeatmapOverlay", this, function (h337){
     'use strict';
 
+    /**
+     * class stands for HeatmapLayer
+     * 
+     * @param {*} cfg configuraton settings see: https://www.patrick-wied.at/static/heatmapjs/docs.html#h337-register
+     */
     var HeatmapOverlay = function(cfg){
-        this.initialize(cfg);
+        this._initialize(cfg);
         var instance = this;
         longdo.Layer.call(this,'heatmaplayer',{
             type: longdo.LayerType.Custom,
             url: function(projection,map,zoom){
-                return instance.getURL(projection, map, zoom);
+                return instance._getURL(projection, map, zoom);
             }
         });
     };
     HeatmapOverlay.prototype = Object.create(longdo.Layer.prototype);
     HeatmapOverlay.prototype.constructor = HeatmapOverlay;
     
-    HeatmapOverlay.prototype.initialize = function(cfg){
+    HeatmapOverlay.prototype._initialize = function(cfg){
         this.cfg = cfg;
         this._data = [];
         this._max = 1;
@@ -47,7 +52,15 @@
         this.cfg.width = this.cfg.height = this.tileResSqrt;
         this._heatmap = h337.create(this.cfg);
     };
-    HeatmapOverlay.prototype.getURL = function (projection, tile, zoom){
+    /**
+     * returns base64 encoded image URL
+     *
+     * @param {*} projection map projection
+     * @param {*} tile requested map tile
+     * @param {*} zoom zoom level
+     * @returns {String} base64 encoded image scheme URL
+     */
+    HeatmapOverlay.prototype._getURL = function (projection, tile, zoom){
         if(projection != longdo.Projections.EPSG3857)return '';
         this.tileNumSqrt = 2 << (zoom-1);
         var len = this._data.length;
@@ -95,6 +108,11 @@
         this._heatmap.setData(generatedData);
         return this._heatmap.getDataURL();
     };
+    /**
+     * accepts points & values data
+     *
+     * @param {*} data points & values data. For syntax, see: https://www.patrick-wied.at/static/heatmapjs/docs.html#h337-register
+     */
     HeatmapOverlay.prototype.setData = function (data){
         this._max = data.max || this._max;
         this._min = data.min || this._min;
