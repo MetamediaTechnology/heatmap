@@ -25,7 +25,7 @@
     var HeatmapOverlay = function(cfg){
         this.initialize(cfg);
         var instance = this;
-        longdo.Layer.call(this,'test',{
+        longdo.Layer.call(this,'heatmaplayer',{
             type: longdo.LayerType.Custom,
             url: function(projection,map,zoom){
                 return instance.getURL(projection, map, zoom);
