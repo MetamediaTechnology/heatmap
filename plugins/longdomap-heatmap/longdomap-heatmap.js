@@ -22,8 +22,8 @@
 })("HeatmapOverlay", this, function (h337){
     'use strict';
 
-    var HeatmapOverlay = function(map, cfg){
-        this.initialize(map, cfg);
+    var HeatmapOverlay = function(cfg){
+        this.initialize(cfg);
         var instance = this;
         longdo.Layer.call(this,'test',{
             type: longdo.LayerType.Custom,
@@ -35,13 +35,12 @@
     HeatmapOverlay.prototype = Object.create(longdo.Layer.prototype);
     HeatmapOverlay.prototype.constructor = HeatmapOverlay;
     
-    HeatmapOverlay.prototype.initialize = function(map, cfg){
+    HeatmapOverlay.prototype.initialize = function(cfg){
         this.cfg = cfg;
         this._data = [];
         this._max = 1;
         this._min = 0;
-        this._map = map;
-        this.tileNumSqrt = 2 << (map.zoom()-1);
+        this.tileNumSqrt = 2 << 1;
         this.tileResSqrt = 64;
         this.cfg.container = document.createElement('div');
         this.cfg.container.style.cssText = 'width:' + this.tileResSqrt + 'px;height:' + this.tileResSqrt + 'px';
