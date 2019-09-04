@@ -1,5 +1,5 @@
 /*
-* heatmap.js Google Maps Overlay
+* heatmap.js Longdo Map Overlay
 *
 * Copyright (c) 2008-2016, Patrick Wied (https://www.patrick-wied.at)
 * Dual-licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
