@@ -61,10 +61,12 @@
      * @returns {String} base64 encoded image scheme URL
      */
     HeatmapOverlay.prototype._getURL = function (projection, tile, zoom){
+        //The number of tiles in x/y-axis
         this.tileNumSqrtX = 2 << (zoom-1);
         this.tileNumSqrtY = projection == longdo.Projections.EPSG4326 ? this.tileNumSqrtX/2 : this.tileNumSqrtX;
         var len = this._data.length;
         var generatedData = {data:[],max:this._max,min:this._min};
+        // If all points are outside of the tile or not
         var Alloutside = false;
         if(this._data.length == 0){
             if(this._heatmap)this._heatmap.setData(generatedData);
@@ -73,12 +75,15 @@
         var localMax = 0, localMin = 0;
         while(len--){
             var entry = this._data[len];
+            //The tile including the point
             var inctile = this._getTileIncludeLatlon(entry,projection);
             var scale = 2 << (zoom - 1);
             var radiusMultiplier = this.cfg.scaleRadius ? scale : 1;
             var radius = entry.radius ? entry.radius * radiusMultiplier : (this.cfg.radius || 2) * radiusMultiplier;
-            var distance = radius / this.tileResSqrt;
-            if(Math.abs(inctile.u - tile.u) <= Math.ceil(1+distance) && Math.abs(inctile.v - tile.v) <= Math.ceil(1+distance)){
+            // distance between the tile & the tile including the point in tile-scale
+            var distance = 1 + radius / this.tileResSqrt;
+            if(Math.abs(inctile.u - tile.u) <= Math.ceil(distance) && Math.abs(inctile.v - tile.v) <= Math.ceil(distance)){
+                // each value start to count from left-top vertex
                 var elon = 360 / this.tileNumSqrtX;
                 var offsetlon =  entry.lon +  180 - tile.u * elon;
                 
@@ -87,6 +92,7 @@
 
                 var x = Math.round(offsetlon*(this.tileResSqrt/elon));
                 var y = Math.round(offsetlat*(this.tileResSqrt/elat));
+                // If the point is outside of the tile, this bool is no longer false
                 Alloutside = Alloutside || x < 0 || x > this.tileResSqrt || y < 0 || y > this.tileResSqrt;
 
                 generatedData.data.push({x: x, y: y, value: entry.value, radius: radius});
@@ -104,7 +110,7 @@
             //note: inserting dummy point to avoid rendering bug
         }
         // uncomment below if 'canvas height is 0' error occurs
-        //this._heatmap._renderer.setDimensions(this.tileResSqrt, this.tileResSqrt);
+        // this._heatmap._renderer.setDimensions(this.tileResSqrt, this.tileResSqrt);
         this._heatmap.setData(generatedData);
         return this._heatmap.getDataURL();
     };
