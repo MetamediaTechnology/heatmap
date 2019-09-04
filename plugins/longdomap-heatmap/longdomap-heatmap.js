@@ -100,24 +100,15 @@
     HeatmapOverlay.prototype._getTileIncludeLatlon = function (latlon){
         var tx = latlon.lon + 180;
         var ex = 360 / this.tileNumSqrt;
-        var v = 0;
-        var i = 180;
-        var di = i / (this.tileNumSqrt/2);
-        for(i-=di; i >= -180; i-=di,v++){
-            var vlat = this._y2lat(i);
-            if(latlon.lat > vlat){
-                break;
-            }
-        }
-        //TODO
-        return {u:Math.floor(tx/ex),v:v};
+        var y = 180 - this._lat2y(latlon.lat);
+        var ey = 360 / this.tileNumSqrt;
+        return {u:Math.floor(tx/ex),v:Math.floor(y/ey)};
     };
 
     /*
     Adapted from https://wiki.openstreetmap.org/wiki/Mercator
     */
-    HeatmapOverlay.prototype._y2lat = function (y) { //TODO
-        return (Math.atan(Math.exp(y / (180 / Math.PI))) / (Math.PI / 4) - 1) * 90; };
+    HeatmapOverlay.prototype._y2lat = function (y) { return (Math.atan(Math.exp(y / (180 / Math.PI))) / (Math.PI / 4) - 1) * 90; };
     HeatmapOverlay.prototype._lat2y = function (lat) { return Math.log(Math.tan((lat / 90 + 1) * (Math.PI / 4) )) * (180 / Math.PI); };
  
     return HeatmapOverlay;
