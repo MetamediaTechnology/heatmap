@@ -25,13 +25,15 @@
     var HeatmapOverlay = function(map, cfg){
         this.initialize(map, cfg);
         var instance = this;
-        map.Layers.add(new longdo.Layer('test',{
+        longdo.Layer.call(this,'test',{
             type: longdo.LayerType.Custom,
             url: function(projection,map,zoom){
                 return instance.getURL(projection, map, zoom);
             }
-        }));    
+        });
     };
+    HeatmapOverlay.prototype = Object.create(longdo.Layer.prototype);
+    HeatmapOverlay.prototype.constructor = HeatmapOverlay;
     
     HeatmapOverlay.prototype.initialize = function(map, cfg){
         this.cfg = cfg;
