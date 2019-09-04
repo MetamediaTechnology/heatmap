@@ -46,7 +46,7 @@
         this._max = 1;
         this._min = 0;
         this.tileNumSqrtX = this.tileNumSqrtY = 2 << 1;
-        this.tileResSqrt = 64;
+        this.tileResSqrt = 256;
         this.cfg.container = document.createElement('div');
         this.cfg.container.style.cssText = 'width:' + this.tileResSqrt + 'px;height:' + this.tileResSqrt + 'px';
         this.cfg.width = this.cfg.height = this.tileResSqrt;
@@ -90,8 +90,8 @@
                 var elat = 180 / this.tileNumSqrtY;
                 var offsetlat = projection == longdo.Projections.EPSG4326 ? 90 - entry.lat - elat*tile.v : 90 - this._lat2y(entry.lat)/2- elat*tile.v;
 
-                var x = Math.round(offsetlon*(this.tileResSqrt/elon));
-                var y = Math.round(offsetlat*(this.tileResSqrt/elat));
+                var x = Math.floor(offsetlon*(this.tileResSqrt/elon));
+                var y = Math.floor(offsetlat*(this.tileResSqrt/elat));
                 // If the point is outside of the tile, this bool is no longer false
                 Alloutside = Alloutside || x < 0 || x > this.tileResSqrt || y < 0 || y > this.tileResSqrt;
 
