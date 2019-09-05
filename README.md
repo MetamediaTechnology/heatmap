@@ -1,6 +1,6 @@
-# heatmap-longo-map
+# heatmap-Longdo-Map
 
-This is a plugin of heatmap.js for adding heatmap layer on longdo map. For more information on heatmap.js, see:[heatmap.js](https://github.com/pa7/heatmap.js/blob/master/README.md)
+This is a plugin of heatmap.js for adding heatmap layer on Longdo Map. For more information on heatmap.js, see:[heatmap.js](https://github.com/pa7/heatmap.js/blob/master/README.md)
 
 ## where the plugins is located
 
@@ -8,10 +8,10 @@ This is a plugin of heatmap.js for adding heatmap layer on longdo map. For more 
 
 ## how to use
 
-### 1. Load longdo API & heatmap.js before the plugin is loaded.
+### 1. Load Longdo API & heatmap.js before the plugin is loaded.
 
 ```html
-<script src="https://api.longdo.com/map/?key=[Your own key]]"></script>
+<script src="https://api.longdo.com/map/?key=[Your own key]"></script>
 <script src="heatmap.js"></script>
 <script src="longdomap-heatmap.js"></script>
 ```
@@ -42,7 +42,7 @@ heatmapLayer = new HeatmapOverlay(cfg);
 heatmapLayer.setData(testData);
 ```
 
-### 5. Add to longdo map.
+### 5. Add to Longdo Map.
 
 ```javascript
 map.Layers.add(heatmapLayer);
