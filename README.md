@@ -86,3 +86,14 @@ configurable values are as the same as ones of original heatmap.js. However, you
 * ...
 
 For more information, see: [heatmap.js](https://www.patrick-wied.at/static/heatmapjs/)
+
+## Authors
+
+* pa7/Patrick Wied
+* original heatmap.js contributors
+* belkey
+
+
+## Licenses
+
+This plugin is licensed under MIT License. (see: [LICENSE file](https://github.com/MetamediaTechnology/heatmap-longdo-map/blob/master/LICENSE))
