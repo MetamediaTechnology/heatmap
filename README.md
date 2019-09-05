@@ -50,7 +50,14 @@ map.Layers.add(heatmapLayer);
 
 ## Demos
 
-see what is in [example/longdomap-heatmap folder](https://github.com/MetamediaTechnology/heatmap-longdo-map/tree/master/examples/longdomap-heatmap)
+For those who would like to see quickly, here is links to them.
+
+* [Path of Kajiki (14th typhoon in 2019)](https://belkey.github.io/longdo-map-heatmap/kajiki.html)
+* [World population(not accurate)](https://belkey.github.io/longdo-map-heatmap/population.html)
+
+*Note: turn off Adblock otherwise you cannot load heatmap.js*  
+
+For sourcecode,see what is in [example/longdomap-heatmap folder](https://github.com/MetamediaTechnology/heatmap-longdo-map/tree/master/examples/longdomap-heatmap)
 
 ## data points syntax
 
