@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://api.longdo.com/map/?key=171082bb9618aa7b985baa7098d6bdce"></script>
+	<script src="../../build/heatmap.js"></script>
+	<script src="../../plugins/longdomap-heatmap.js"></script>
+	<title>World Map</title>
+	<style type="text/css">
+          html{
+            height:100%;
+          }
+          body{
+            margin:0px;
+            height:100%;
+          }
+          #map {
+            height: 100%;
+            width: 100%;
+          }
+        </style>
+</head>
+<body onload="init();">
+<div id="map"></div>
+<script type="text/javascript">
+	var map;
+	var heatmapLayer;
+	function init() {
+	  map = new longdo.Map({
+	    placeholder: document.getElementById('map'),
+	    language: 'en',
+	    zoom: 1,
+	    lastView: false
+	  });
+	  //data is not accurate and manipulated
+	  var testData = {max: 10,data:[
+	  	{lat:60.087195,lon:84.767761,value:8},
+	  	{lat:14.988076,lon:17.970886,value:6},
+	  	{lat:41.804724,lon:-104.021301,value:4},
+	  	{lat:-22.876642,lon:-59.724426,value:4},
+	  	{lat:50.092949,lon:16.213074,value:2},
+	  	{lat:-26.075742,lon:132.931824,value:2}]};
+	  var cfg = {
+	  	'radius': 25,
+	  	"maxOpacity": .5,
+	  	"scaleRadius": true,
+	  	"useLocalExtrema": false
+	  };
+	  heatmapLayer = new HeatmapOverlay(cfg);
+	  heatmapLayer.setData(testData);
+	  map.Layers.add(heatmapLayer);
+	}
+</script>
+</body>
+</html>

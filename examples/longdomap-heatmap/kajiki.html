@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://api.longdo.com/map/?key=171082bb9618aa7b985baa7098d6bdce"></script>
+	<script src="../../build/heatmap.js"></script>
+	<script src="../../plugins/longdomap-heatmap/longdomap-heatmap.js"></script>
+	<title>Path of Kajiki(14th typhoon in 2019) </title>
+	<style type="text/css">
+          html{
+            height:100%;
+          }
+          body{
+            margin:0px;
+            height:100%;
+          }
+          #map {
+            height: 100%;
+            width: 100%;
+          }
+        </style>
+</head>
+<body onload="init();">
+<div id="map"></div>
+<script type="text/javascript">
+	var map;
+	var heatmapLayer;
+	function init() {
+	  map = new longdo.Map({
+	    placeholder: document.getElementById('map'),
+	    language: 'en'
+	  });
+	  // data from http://www.micosfit.jp/suginami-ku/typhoon_dpx/index.html
+	  var testData = {max: 10,data:[
+	  	{lat:19.3,lon:119.35,value:8},
+	  	{lat:19.3,lon:119.3,value:8},
+	  	{lat:19.2,lon:118.35,value:8},
+	  	{lat:19.1,lon:118,value:8},
+	  	{lat:19,lon:117.2,value:8},
+	  	{lat:19.05,lon:116.1,value:8},
+	  	{lat:19,lon:115.25,value:8},
+	  	{lat:19.1,lon:114.25,value:8},
+	  	{lat:19,lon:113.35,value:8},
+	  	{lat:19.3,lon:119.3,value:8},
+	  	{lat:18.55,lon:112.55,value:8},
+	  	{lat:18.55,lon:112.25,value:8},
+	  	{lat:18.5,lon:112,value:8},
+	  	{lat:18.4,lon:111.25,value:8},
+	  	{lat:18.3,lon:110.2,value:8},
+	  	{lat:18.25,lon:109.2,value:8},
+	  	{lat:18,lon:108.25,value:8},
+	  	{lat:17.1,lon:108.1,value:8},
+	  	]};
+	  var cfg = {
+	  	"radius": 2,
+	  	"maxOpacity": .5,
+	  	"scaleRadius": true,
+	  	"useLocalExtrema": true
+	  };
+	  heatmapLayer = new HeatmapOverlay(cfg);
+	  heatmapLayer.setData(testData);
+	  map.Layers.add(heatmapLayer);
+	}
+</script>
+</body>
+</html>

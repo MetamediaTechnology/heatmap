@@ -1,55 +1,81 @@
-# heatmap.js
-Dynamic Heatmaps for the Web. 
+# heatmap-longo-map
 
-[<img src="http://www.patrick-wied.at/static/heatmapjs/assets/img/heatmapjs-examples-docs-banner.jpg" width="100%">](http://www.patrick-wied.at/static/heatmapjs/?utm_source=gh "View the heatmap.js website with usage examples, showcases, best practises, plugins ( googlemaps heatmap, leaflet) and more.")
+This is a plugin of heatmap.js for adding heatmap layer on longdo map. For more information on heatmap.js, see:[heatmap.js](https://github.com/pa7/heatmap.js/blob/master/README.md)
 
-## How to get started
+## where the plugins is located
 
-The fastest way to get started is to install heatmap.js with bower. Just run the following command:
+[plugins/longdomap-heatmap/longdomap-heatmap.js](https://github.com/MetamediaTechnology/heatmap-longdo-map/tree/master/plugins/longdomap-heatmap)
 
-`bower install heatmap.js-amd`
+## how to use
 
-This will download the latest working version of heatmap.js and put it in your bower_components folder.
+### 1. Load longdo API & heatmap.js before the plugin is loaded.
 
-Alternatively you could just download [the latest release](https://github.com/pa7/heatmap.js/releases) from github and unzip it.
+```html
+<script src="https://api.longdo.com/map/?key=[Your own key]]"></script>
+<script src="heatmap.js"></script>
+<script src="longdomap-heatmap.js"></script>
+```
 
+### 2. Prepare data points.
 
-The file you're ultimately looking for is **heatmap.js** or **heatmap.min.js**
+```javascript
+var testData = {max: 10,data:[
+	  	{lat:60.087195,lon:84.767761,value:8},
+	  	{lat:41.804724,lon:-104.021301,value:4},]};
+```
 
+### 3. Prepare configuration.
 
+```javascript
+var cfg = {
+	  	'radius': 25,
+	  	"maxOpacity": .5,
+	  	"scaleRadius": true,
+	  	"useLocalExtrema": true
+	  };
+```
 
-heatmap.js is also hosted on npm:
+### 4. Instantiate HeatmapOverlay with config below & set data.
 
-`npm install heatmap.js`
+```javascript
+heatmapLayer = new HeatmapOverlay(cfg);
+heatmapLayer.setData(testData);
+```
 
+### 5. Add to longdo map.
 
+```javascript
+map.Layers.add(heatmapLayer);
+```
 
-### How to run the local examples
+## Demos
 
-Start a webserver (e.g. python SimpleHTTPServer from the project directory root):
+see what is in [example/longdomap-heatmap folder](https://github.com/MetamediaTechnology/heatmap-longdo-map/tree/master/examples/longdomap-heatmap)
 
-`python -m SimpleHTTPServer 1337 &`
+## data points syntax
 
-Then browse to 
+Data points have to be defined in JSON format such as:
 
-`http://localhost:1337/examples/`
+```javascript
+var testData = {max: 10,data:[
+	  	{lat:60.087195,lon:84.767761,value:8,radius:20},
+	  	{lat:41.804724,lon:-104.021301,value:4},]};
+```
 
+'radius' field is optional. The default radius is 2. If scaleRadius in config is true, it will be manipulated. 
 
-## Get involved
+## configuration
 
-Please have a look at the [contribution guidelines](CONTRIBUTE.md) before submitting contributions. 
+configurable values are as the same as ones of original heatmap.js. However, you cannot use container option.
 
-**Disclaimer**: PRs can take time to receive feedback or be merged ( I'm only one person with very little time ) but I'm trying to get back to everyone eventually
+* backgroundColor
+* gradient
+* maxOpacity
+* minOpacity
+* blur
+* radius
+* scaleRadius
+* useLocalExtrema
+* ...
 
-## Questions?
-
-In order to keep technical questions in a central place where other people can learn from it, the best thing you can do is [post your question to stackoverflow with the tag **heatmap.js**.](http://stackoverflow.com/questions/ask?tags=heatmap.js) 
-
-If you do have a very specific question (or need commercial support) don't hesitate to contact me directly [via email](mailto:heatmap-q@patrick-wied.at).
-
-
-## Mailing list
-
-Want to receive the latest updates and news about heatmap.js? 
-
-There is a [mailing list](http://eepurl.com/0mmV5). No spam, just news and important updates.
+For more information, see: [heatmap.js](https://www.patrick-wied.at/static/heatmapjs/)
