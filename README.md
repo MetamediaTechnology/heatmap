@@ -52,8 +52,8 @@ map.Layers.add(heatmapLayer);
 
 For those who would like to see quickly, here is links to them.
 
-* [Path of Kajiki (14th typhoon in 2019)](https://belkey.github.io/longdo-map-heatmap/kajiki.html)
-* [World population(not accurate)](https://belkey.github.io/longdo-map-heatmap/population.html)
+* [Path of Kajiki (14th typhoon in 2019)](https://metamediatechnology.github.io/longdo-map-heatmap/kajiki.html)
+* [World population(not accurate)](https://metamediatechnology.github.io/longdo-map-heatmap/population.html)
 
 *Note: turn off Adblock otherwise you cannot load heatmap.js*  
 
