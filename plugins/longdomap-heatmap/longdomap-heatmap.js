@@ -39,11 +39,11 @@
     };
     HeatmapOverlay.prototype = Object.create(longdo.Layer.prototype);
     HeatmapOverlay.prototype.constructor = HeatmapOverlay;
-    
     HeatmapOverlay.prototype._initialize = function(cfg){
         this.cfg = cfg;
         this._data = [];
         this._max = 1;
+        this.defer = true;
         this._min = 0;
         this.tileNumSqrtX = this.tileNumSqrtY = 2 << 1;
         this.tileResSqrt = 256;
