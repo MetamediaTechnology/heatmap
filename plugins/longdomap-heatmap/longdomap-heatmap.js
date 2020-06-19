@@ -27,6 +27,7 @@
      * 
      * @param {*} cfg configuraton settings see: https://www.patrick-wied.at/static/heatmapjs/docs.html#h337-register
      */
+    var Cache = []
     var HeatmapOverlay = function(cfg){
         this._initialize(cfg);
         var instance = this;
@@ -61,6 +62,7 @@
      * @returns {String} base64 encoded image scheme URL
      */
     HeatmapOverlay.prototype._getURL = function (projection, tile, zoom){
+
         //The number of tiles in x/y-axis
         this.tileNumSqrtX = 2 << (zoom-1);
         this.tileNumSqrtY = projection == longdo.Projections.EPSG4326 ? this.tileNumSqrtX/2 : this.tileNumSqrtX;
@@ -100,19 +102,26 @@
             localMax = Math.max(entry.value, localMax);
             localMin = Math.min(entry.value, localMin);   
         }
-        if(this.cfg.useLocalExtrema){
-            generatedData.max = localMax;
-            generatedData.min = localMin;
+        // Keep the result of tile help reduce load time.
+        if(Cache[tile.u + "-"+tile.v]){
+            return Cache[tile.u + "-"+tile.v]
         }
-        //If all points are outside of the tile...
-        if(Alloutside){
-            generatedData.data.push({x:1,y:1,value: -Number.EPSILON,radius:0});
-            //note: inserting dummy point to avoid rendering bug
+        else{
+            if(this.cfg.useLocalExtrema){
+                generatedData.max = localMax;
+                generatedData.min = localMin;
+            }
+            //If all points are outside of the tile...
+            if(Alloutside){
+                generatedData.data.push({x:1,y:1,value: -Number.EPSILON,radius:0});
+                //note: inserting dummy point to avoid rendering bug
+            }
+            // uncomment below if 'canvas height is 0' error occurs
+            // this._heatmap._renderer.setDimensions(this.tileResSqrt, this.tileResSqrt);
+            this._heatmap.setData(generatedData);
+            Cache[tile.u + "-"+tile.v] = this._heatmap.getDataURL();
+            return this._heatmap.getDataURL();
         }
-        // uncomment below if 'canvas height is 0' error occurs
-        // this._heatmap._renderer.setDimensions(this.tileResSqrt, this.tileResSqrt);
-        this._heatmap.setData(generatedData);
-        return this._heatmap.getDataURL();
     };
     /**
      * accepts points & values data
