@@ -27,7 +27,6 @@
      * 
      * @param {*} cfg configuraton settings see: https://www.patrick-wied.at/static/heatmapjs/docs.html#h337-register
      */
-    var Cache = []
     var HeatmapOverlay = function(cfg){
         this._initialize(cfg);
         var instance = this;
@@ -46,6 +45,7 @@
         this._max = 1;
         this.defer = true;
         this._min = 0;
+        this.Cache = [];
         this.tileNumSqrtX = this.tileNumSqrtY = 2 << 1;
         this.tileResSqrt = 256;
         this.cfg.container = document.createElement('div');
@@ -102,9 +102,10 @@
             localMax = Math.max(entry.value, localMax);
             localMin = Math.min(entry.value, localMin);   
         }
+
         // Keep the result of tile help reduce load time.
-        if(Cache[tile.u + "-"+tile.v]){
-            return Cache[tile.u + "-"+tile.v]
+        if(this.Cache[tile.u + "-"+tile.v]){
+            return this.Cache[tile.u + "-"+tile.v]
         }
         else{
             if(this.cfg.useLocalExtrema){
@@ -119,7 +120,7 @@
             // uncomment below if 'canvas height is 0' error occurs
             // this._heatmap._renderer.setDimensions(this.tileResSqrt, this.tileResSqrt);
             this._heatmap.setData(generatedData);
-            Cache[tile.u + "-"+tile.v] = this._heatmap.getDataURL();
+            this.Cache[tile.u + "-"+tile.v] = this._heatmap.getDataURL();
             return this._heatmap.getDataURL();
         }
     };
@@ -146,6 +147,9 @@
         var ex = 360 / this.tileNumSqrtX;
         var ey = projection == longdo.Projections.EPSG4326 ? 180 / this.tileNumSqrtY : 360 / this.tileNumSqrtY;
         return {u:Math.floor(tx/ex),v:Math.floor(y/ey)};
+    };
+    HeatmapOverlay.prototype._clearCache = function () {
+        this.Cache = []
     };
 
     /*
