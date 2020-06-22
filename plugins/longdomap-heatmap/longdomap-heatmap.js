@@ -102,10 +102,9 @@
             localMax = Math.max(entry.value, localMax);
             localMin = Math.min(entry.value, localMin);   
         }
-
         // Keep the result of tile help reduce load time.
-        if(this.Cache[tile.u + "-"+tile.v]){
-            return this.Cache[tile.u + "-"+tile.v]
+        if(this.Cache[tile.u + "-"+tile.v+ "-" + tile.w]){
+            return this.Cache[tile.u + "-"+tile.v+ "-" + tile.w]
         }
         else{
             if(this.cfg.useLocalExtrema){
@@ -120,7 +119,7 @@
             // uncomment below if 'canvas height is 0' error occurs
             // this._heatmap._renderer.setDimensions(this.tileResSqrt, this.tileResSqrt);
             this._heatmap.setData(generatedData);
-            this.Cache[tile.u + "-"+tile.v] = this._heatmap.getDataURL();
+            this.Cache[tile.u + "-"+tile.v+ "-" + tile.w] = this._heatmap.getDataURL();
             return this._heatmap.getDataURL();
         }
     };
