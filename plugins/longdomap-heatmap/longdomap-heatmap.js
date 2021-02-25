@@ -32,8 +32,11 @@
         var instance = this;
         longdo.Layer.call(this,'heatmaplayer',{
             type: longdo.LayerType.Custom,
-            url: function(projection,map,zoom){
-                return instance._getURL(projection, map, zoom);
+            defer: (element, projection, tile, zoom, hd) => {
+              setTimeout(() => { 
+                const url = instance._getURL(projection, tile, zoom)
+                element.src = url 
+              }, 0);
             }
         });
     };
@@ -43,7 +46,7 @@
         this.cfg = cfg;
         this._data = [];
         this._max = 1;
-        this.defer = true;
+        // this.defer = true;
         this._min = 0;
         this.Cache = [];
         this.tileNumSqrtX = this.tileNumSqrtY = 2 << 1;
