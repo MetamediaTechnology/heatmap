@@ -32,8 +32,11 @@
         var instance = this;
         longdo.Layer.call(this,'heatmaplayer',{
             type: longdo.LayerType.Custom,
-            url: function(projection,map,zoom){
-                return instance._getURL(projection, map, zoom);
+            defer: (element, projection, tile, zoom, hd) => {
+              setTimeout(() => { 
+                const url = instance._getURL(projection, tile, zoom)
+                element.src = url 
+              }, 0);
             }
         });
     };
@@ -43,8 +46,9 @@
         this.cfg = cfg;
         this._data = [];
         this._max = 1;
-        this.defer = true;
+        // this.defer = true;
         this._min = 0;
+        this.Cache = [];
         this.tileNumSqrtX = this.tileNumSqrtY = 2 << 1;
         this.tileResSqrt = 256;
         this.cfg.container = document.createElement('div');
@@ -61,6 +65,7 @@
      * @returns {String} base64 encoded image scheme URL
      */
     HeatmapOverlay.prototype._getURL = function (projection, tile, zoom){
+
         //The number of tiles in x/y-axis
         this.tileNumSqrtX = 2 << (zoom-1);
         this.tileNumSqrtY = projection == longdo.Projections.EPSG4326 ? this.tileNumSqrtX/2 : this.tileNumSqrtX;
@@ -100,19 +105,26 @@
             localMax = Math.max(entry.value, localMax);
             localMin = Math.min(entry.value, localMin);   
         }
-        if(this.cfg.useLocalExtrema){
-            generatedData.max = localMax;
-            generatedData.min = localMin;
+        // Keep the result of tile help reduce load time.
+        if(this.Cache[tile.u + "-"+tile.v+ "-" + tile.w]){
+            return this.Cache[tile.u + "-"+tile.v+ "-" + tile.w]
         }
-        //If all points are outside of the tile...
-        if(Alloutside){
-            generatedData.data.push({x:1,y:1,value: -Number.EPSILON,radius:0});
-            //note: inserting dummy point to avoid rendering bug
+        else{
+            if(this.cfg.useLocalExtrema){
+                generatedData.max = localMax;
+                generatedData.min = localMin;
+            }
+            //If all points are outside of the tile...
+            if(Alloutside){
+                generatedData.data.push({x:1,y:1,value: -Number.EPSILON,radius:0});
+                //note: inserting dummy point to avoid rendering bug
+            }
+            // uncomment below if 'canvas height is 0' error occurs
+            // this._heatmap._renderer.setDimensions(this.tileResSqrt, this.tileResSqrt);
+            this._heatmap.setData(generatedData);
+            this.Cache[tile.u + "-"+tile.v+ "-" + tile.w] = this._heatmap.getDataURL();
+            return this._heatmap.getDataURL();
         }
-        // uncomment below if 'canvas height is 0' error occurs
-        // this._heatmap._renderer.setDimensions(this.tileResSqrt, this.tileResSqrt);
-        this._heatmap.setData(generatedData);
-        return this._heatmap.getDataURL();
     };
     /**
      * accepts points & values data
@@ -137,6 +149,9 @@
         var ex = 360 / this.tileNumSqrtX;
         var ey = projection == longdo.Projections.EPSG4326 ? 180 / this.tileNumSqrtY : 360 / this.tileNumSqrtY;
         return {u:Math.floor(tx/ex),v:Math.floor(y/ey)};
+    };
+    HeatmapOverlay.prototype._clearCache = function () {
+        this.Cache = []
     };
 
     /*
